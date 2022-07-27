@@ -485,15 +485,22 @@ static IIO_DEVICE_ATTR(in_voltage_sampling_frequency_available, S_IRUGO,
 		       NULL,
 		       0);
 
-static struct attribute *axiadc_attributes[] = {
-	&iio_dev_attr_sync_start_enable.dev_attr.attr,
-	&iio_dev_attr_sync_start_enable_available.dev_attr.attr,
+static struct attribute *axiadc_dec_attributes[] = {
 	&iio_dev_attr_in_voltage_sampling_frequency_available.dev_attr.attr,
 	NULL,
 };
 
+static struct attribute *axiadc_ext_sync_attributes[] = {
+	&iio_dev_attr_sync_start_enable.dev_attr.attr,
+	&iio_dev_attr_sync_start_enable_available.dev_attr.attr,
+};
+
 static const struct attribute_group axiadc_dec_attribute_group = {
-	.attrs = axiadc_attributes,
+	.attrs = axiadc_dec_attributes,
+};
+
+static const struct attribute_group axiadc_ext_sync_attribute_group = {
+	.attrs = axiadc_ext_sync_attributes,
 };
 
 static int axiadc_read_raw(struct iio_dev *indio_dev,
@@ -1224,9 +1231,17 @@ static int axiadc_probe(struct platform_device *pdev)
 		&axiadc_dec_attribute_group, skip);
 	if (ret) {
 		dev_err(&pdev->dev,
-			"Failed to add sysfs attributes (%d)\n", ret);
+			"Failed to add sysfs dec attributes (%d)\n", ret);
 		goto err_unconfigure_ring;
 	}
+
+	// ret = axiadc_append_attrs(indio_dev,
+	// 	&axiadc_ext_sync_attribute_group, skip);
+	// if (ret) {
+	// 	dev_err(&pdev->dev,
+	// 		"Failed to add sysfs ext_sync attributes (%d)\n", ret);
+	// 	goto err_unconfigure_ring;
+	// }
 
 	ret = iio_device_register(indio_dev);
 	if (ret)
